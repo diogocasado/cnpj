@@ -1,0 +1,11 @@
+{
+  "name": "cnpj",
+  "version": "0.0.1",
+  "author": "Diogo Casado",
+  "license": "SEE LICENSE IN LICENSE",
+  "url": "https://github.com/diogocasado/cnpj",
+  "main": "index.js",
+  "bin": {
+    "execute": "index.js"
+  }
+}
