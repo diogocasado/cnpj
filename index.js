@@ -105,8 +105,8 @@ function resolveObj (root, path = '') {
             break;
         node = parsePathNode(node);
         obj = obj[node.property];
-        //if (typeof obj === 'undefined' || obj === null)
-            //break;
+        if (typeof obj === 'undefined' || obj === null)
+            return null;
         if (node.selector === '~')
             obj = obj[obj.length - 1];
         else if (node.selector)
@@ -121,17 +121,20 @@ function attributeObj (root, path = '', value) {
     const node = parsePathNode(nodes.pop());
 
     let obj = resolveObj(root, nodes);
+    if (obj) {
+        let property = node.property;
+        if (node.selector) {
+            obj = obj[node.property];
+            if (node.selector === '[~]')
+                property = obj.length - 1;
+            else
+                property = node.selector;
+        }
 
-    let property = node.property;
-    if (node.selector) {
-        obj = obj[node.property];
-        if (node.selector === '[~]')
-            property = obj.length - 1;
-        else
-            property = node.selector;
+        obj[property] = value;
+    } else {
+        console.log('attributeObj: Cannot set "' + path + '"');
     }
-
-    obj[property] = value;
 }
 
 function* pathIterator (root, path) {
@@ -407,15 +410,19 @@ function parseStructure (ctx, struct) {
             handler(ctx);
     }
     const obj = resolveObj(ctx, struct._path);
-    for (let field in struct) {
-        if (field.startsWith('_'))
-            continue;
-        let op = struct[field];
-        if (typeof op === 'function') {
-            let value = op(ctx);
-            if (value !== '')
-                obj[field] = value;
+    if (obj) {
+        for (let field in struct) {
+            if (field.startsWith('_'))
+                continue;
+            let op = struct[field];
+            if (typeof op === 'function') {
+                let value = op(ctx);
+                if (value !== '')
+                    obj[field] = value;
+            }
         }
+    } else {
+        console.log('parseStructure: Cannot get path "' + struct._path + '"');
     }
 }
 
@@ -469,10 +476,14 @@ function newObj (path) {
     const property = path.slice(-1);
     return (ctx) => {
         const obj = resolveObj(ctx, relPath);
-        if (Array.isArray(obj[property]))
-            obj[property].push({});
-        else
-            obj[property] = {};
+        if (typeof obj !== 'undefined' && obj !== null) {
+            if (Array.isArray(obj[property]))
+                obj[property].push({});
+            else
+                obj[property] = {};
+        } else {
+            console.log('newObj: Cannot resolve ' + relPath);
+        }
     }
 }
 
