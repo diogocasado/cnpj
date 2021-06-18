@@ -213,7 +213,7 @@ function setupRules (ctx) {
     return ctx;
 }
 
-const MATCH_STARTS_WITH_EXPR = /^(.+?)\:(\w+?)$/g;
+const MATCH_STARTS_WITH_EXPR = /^(.+?)\:(.+?)$/g;
 function matchStartsWith (spec) {
     MATCH_STARTS_WITH_EXPR.lastIndex = 0;
     let match = MATCH_STARTS_WITH_EXPR.exec(spec);
